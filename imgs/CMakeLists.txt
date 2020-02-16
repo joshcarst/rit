@@ -1,0 +1,7 @@
+add_subdirectory(apps)
+add_subdirectory(ipcv)
+add_subdirectory(numerical)
+add_subdirectory(physics)
+add_subdirectory(plot)
+add_subdirectory(radiometry)
+add_subdirectory(third_party)

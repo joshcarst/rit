@@ -1,0 +1,7 @@
+add_subdirectory(diana)
+add_subdirectory(dist)
+add_subdirectory(image_comparison)
+add_subdirectory(list_files)
+add_subdirectory(plot2d)
+add_subdirectory(shapes)
+add_subdirectory(write_video)
