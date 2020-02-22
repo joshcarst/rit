@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
+#include <eigen3/Eigen/Dense>
 
 #include "imgs/third_party/gnuplot-iostream.h"
 
@@ -149,6 +150,30 @@ void Plot2d(const cv::Mat_<T1> x, const cv::Mat_<T2> y,
            if (point_idx < (size_t)x.cols) {
              x_value = x(series_idx, point_idx);
              y_value = y(series_idx, point_idx);
+             return true;
+           }
+           return false;
+         });
+}
+
+/** Convenience function for plotting two-dimensional vector data stored
+ *  in the column(s) of Eigen::Matrix (or Eigen::Vector)
+ *
+ *  \param[in] x independent variable Eigen::Matrix with 1 or multiple columns
+ *  \param[in] y dependent variable Eigen::Matrix with 1 or multiple columns
+ *  \param[in] p plot parameters object of type plot2d::Params
+ */
+template <class T1, class T2, int rows, int cols, int options, int max_rows,
+          int max_cols>
+void Plot2d(const Eigen::Matrix<T1, rows, cols, options, max_rows, max_cols> x,
+            const Eigen::Matrix<T2, rows, cols, options, max_rows, max_cols> y,
+            const plot2d::Params params) {
+  Plot2d(x.cols(), params,
+         [&](size_t series_idx, size_t point_idx, double& x_value,
+             double& y_value) {
+           if (point_idx < (size_t)x.rows()) {
+             x_value = x(point_idx, series_idx);
+             y_value = y(point_idx, series_idx);
              return true;
            }
            return false;

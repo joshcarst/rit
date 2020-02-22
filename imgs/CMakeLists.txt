@@ -1,4 +1,5 @@
 add_subdirectory(apps)
+add_subdirectory(color)
 add_subdirectory(ipcv)
 add_subdirectory(numerical)
 add_subdirectory(physics)
