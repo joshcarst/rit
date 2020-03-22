@@ -211,6 +211,23 @@ where linestyle can take on <span style="font-family:Courier">\<object\>.POINTS<
     template <class T1, class T2>
     void Plot2d(const cv::Mat_<T1> x, const cv::Mat_<T2> y,
                 const plot2d::Params params);
+<br/>
+
+    /** Convenience function for plotting two-dimensional data described by the
+     *  provided function over the interval [x_min, x_max] as defined in the
+     *  provided parameters
+     *
+     *  \param[in] f
+     *     function you would like to plot (prototype cannot be ambiguous)
+     *  \param[in] params
+     *     plot parameters object of type plot2d::Params
+     *  \param[in] n
+     *     the number of points at which to define the discrete representation of
+     *     the function [default is 100]
+     */
+    template <class CALLABLE>
+    void Plot2d(const CALLABLE f, plot::plot2d::Params params,
+                size_t n = 100);
 
 # REQUIREMENTS
 * C++ compiler that supports C++17 dialect/ISO standard
