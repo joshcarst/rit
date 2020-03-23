@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -10,20 +11,37 @@ using namespace std;
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
-  bool verbose = false;
-  string src_filename = "";
+  bool verbose;
+  std::string src_filename;
 
-  po::options_description options("Options");
-  options.add_options()("help,h", "display this message")(
-      "verbose,v", po::bool_switch(&verbose), "verbose [default is silent]")(
-      "source-filename,i", po::value<string>(&src_filename), "source filename");
+  po::options_description visible_options("Options");
+  visible_options.add_options()
+      ("help,h", 
+       "display this message")
+      ("verbose,v", 
+       po::bool_switch(&verbose)->default_value(false), 
+       "verbose [default is silent]")
+  ;
+
+  po::options_description hidden_options("Hidden Options");
+  hidden_options.add_options()
+      ("source-filename,i", 
+       po::value<std::string>(&src_filename)->default_value(""), 
+       "source filename")
+  ;
+
+  po::options_description all_options("All Options");
+  all_options
+      .add(visible_options)
+      .add(hidden_options)
+  ;
 
   po::positional_options_description positional_options;
-  positional_options.add("source-filename", -1);
+  positional_options.add("source-filename", 1);
 
   po::variables_map vm;
   po::store(po::command_line_parser(argc, argv)
-                .options(options)
+                .options(all_options)
                 .positional(positional_options)
                 .run(),
             vm);
@@ -31,7 +49,7 @@ int main(int argc, char* argv[]) {
 
   if (vm.count("help")) {
     cout << "Usage: " << argv[0] << " [options] source-filename" << endl;
-    cout << options << endl;
+    cout << visible_options << endl;
     return EXIT_SUCCESS;
   }
 

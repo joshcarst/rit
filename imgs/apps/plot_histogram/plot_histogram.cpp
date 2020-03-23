@@ -65,7 +65,12 @@ int main(int argc, char* argv[]) {
   }
 
   cv::Mat_<int> h;
+  auto start_time = std::clock();
   ipcv::Histogram(src, h);
+  auto end_time = std::clock();
+  cout << "Elapsed time to compute histogram: "
+       << (end_time - start_time) / static_cast<double>(CLOCKS_PER_SEC)
+       << " [s]" << endl;
 
   cv::Mat_<double> pdf;
   ipcv::HistogramToPdf(h, pdf);
@@ -86,20 +91,8 @@ int main(int argc, char* argv[]) {
   params.set_y_label("Number of Pixels");
   params.set_x_min(0);
   params.set_x_max(255);
-  // params.set_destination_filename(dst_filename);
+  params.set_destination_filename(dst_filename);
   plot::Plot2d(dc, h, params);
-
-  params.set_x_label("Digital Count");
-  params.set_y_label("Probability Density");
-  params.set_x_min(0);
-  params.set_x_max(255);
-  plot::Plot2d(dc, pdf, params);
-
-  params.set_x_label("Digital Count");
-  params.set_y_label("Cumulative Density");
-  params.set_x_min(0);
-  params.set_x_max(255);
-  plot::Plot2d(dc, cdf, params);
 
   return EXIT_SUCCESS;
 }
