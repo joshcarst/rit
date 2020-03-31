@@ -1,3 +1,4 @@
+add_subdirectory(craps)
 add_subdirectory(diana)
 add_subdirectory(dist)
 add_subdirectory(image_comparison)
