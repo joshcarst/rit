@@ -6,20 +6,23 @@
 #include <string>
 #include <vector>
 #include "imgs/radiometry/blackbody_fit/BlackbodyFit.h"
+#include "imgs/plot/plot.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
+  // Check if file was specified in CLI
+  if (argc < 2) {
+    throw std::runtime_error("File not specified, exiting...");
+  }
+
+  // Store the file name
   auto filename = argv[1];
 
   // Check if file exists
   auto exists = std::filesystem::exists(filename);
-  if (exists) {
-    auto msg = "Found specified file";
-    cout << msg << endl;
-  } else {
-    auto msg = "Specified file not found, exiting ...";
-    throw std::runtime_error(msg);
+  if (exists == false) {
+    throw std::runtime_error("Specified file not found, exiting...");
   }
 
   // Create vectors to hold comma-separated data
@@ -32,9 +35,11 @@ int main(int argc, char* argv[]) {
   // Read each line from the file, create a string stream from each line,
   // parse the string stream into the indivudually delimited string
   // elements, convert the string elements to numeric types, and push each
-  // element on to its respective vector 
+  // element on to its respective vector
   std::string line;
-  std::getline(file, line); // skipping the first line as described by Meg
+  std::getline(
+      file,
+      line);  // skipping the header, not a very adaptable solution but whatever
   while (std::getline(file, line)) {
     std::stringstream ss(line);
     std::string str;
@@ -44,16 +49,24 @@ int main(int argc, char* argv[]) {
     radiance.push_back(stod(str));
   }
 
-  // Send each vector to the standard output for examination
-  cout << "Column 1" << endl;
-  for (auto element : x) {
-    cout << element << endl;
-  }
-  cout << endl;
-  cout << "Column 2" << endl;
-  for (auto element : y) {
-    cout << element << endl;
-  }
+  std::vector<double>
+      em_spec;  // making an empty vector to fill with emissivity spectrum
+  auto tolerance = 0.0001;  // setting the acceptable error
+  auto lower_limit = 7.0;   // setting the lower and upper bounds for the graph
+  auto upper_limit = 15.0;
+  double derived_temp = radiometry::BlackbodyFit(
+      wavelength, radiance, tolerance, lower_limit, upper_limit, em_spec);
 
-  double derived_temp = radiometry::BlackbodyFit(wavelength, radiance);
+  // plot parameters
+  plot::plot2d::Params params;
+  params.set_x_label("Wavelength (microns)");
+  params.set_y_label("Emissivity");
+  params.set_linestyle(params.LINES);
+  params.set_x_min(lower_limit);
+  params.set_x_max(upper_limit);
+  params.set_y_min(0.0);
+  params.set_y_max(1.05);
+  plot::Plot2d(wavelength, em_spec, params);
+
+  cout << "Derived temperature = " << derived_temp << " [K]" << endl;
 }

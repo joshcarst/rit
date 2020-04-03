@@ -1,2 +1,3 @@
 add_subdirectory(blackbody)
 add_subdirectory(blackbody_fit)
+add_subdirectory(blackbody_temperature)
