@@ -3,7 +3,7 @@
  *  \file plot/plot2d/Plot2d.h
  *  \author Philip Salvaggio, Ph.D. (psscis@rit.edu)
  *          Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 9 February 2020
+ *  \date 4 April 2020
  */
 
 #pragma once
@@ -53,7 +53,7 @@ void Plot2d(size_t number_of_data_series, const plot2d::Params& params,
        series_idx++) {
     if (series_idx == 0) {
       gp_msg += "plot $data" + std::to_string(series_idx);
-      switch (params.linestyle()) {
+      switch (params.linestyle(series_idx)) {
         case params.LINES:
           gp_msg += " with lines linetype -1";
           break;
@@ -70,7 +70,7 @@ void Plot2d(size_t number_of_data_series, const plot2d::Params& params,
       gp_msg += " linecolor '" + params.colors[series_idx];
     } else {
       gp_msg += "', $data" + std::to_string(series_idx);
-      switch (params.linestyle()) {
+      switch (params.linestyle(series_idx)) {
         case params.LINES:
           gp_msg += " with lines linetype -1";
           break;

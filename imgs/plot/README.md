@@ -158,7 +158,9 @@ With plot labels
 ###### Accessor and mutator for the linestyle member
 
     int linestyle() const;
+    int linestyle(size_t series_idx) const;
     void set_linestyle(int linestyle);
+    void set_linestyle(size_t series_idx, int linestyle);
 
 where linestyle can take on <span style="font-family:Courier">\<object\>.POINTS</span>, <span style="font-family:Courier">\<object\>.LINES</span>, or the sum <span style="font-family:Courier">\<object>.LINES + \<object\>.POINTS</span>.
 
@@ -210,6 +212,23 @@ where linestyle can take on <span style="font-family:Courier">\<object\>.POINTS<
      */
     template <class T1, class T2>
     void Plot2d(const cv::Mat_<T1> x, const cv::Mat_<T2> y,
+                const plot2d::Params params);
+<br/>
+
+    /** Convenience function for plotting two-dimensional vector data stored
+     *  in the column(s) of Eigen::Matrix (or Eigen::Vector)
+     *
+     *  \param[in] x
+     *     independent variable Eigen::Matrix with 1 or multiple columns
+     *  \param[in] y
+     *     dependent variable Eigen::Matrix with 1 or multiple columns
+     *  \param[in] params
+     *     plot parameters object of type plot2d::Params
+     */
+    template <class T1, class T2, int rows, int cols, int options, int max_rows,
+              int max_cols>
+    void Plot2d(const Eigen::Matrix<T1, rows, cols, options, max_rows, max_cols> x,
+                const Eigen::Matrix<T2, rows, cols, options, max_rows, max_cols> y,
                 const plot2d::Params params);
 <br/>
 

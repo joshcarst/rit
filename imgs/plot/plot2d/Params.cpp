@@ -2,7 +2,7 @@
  *
  *  \file plot/plot2d/Params.cpp
  *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 9 February 2020
+ *  \date 4 April 2020
  */
 
 #include "Params.h"
@@ -46,8 +46,14 @@ void Params::set_x_tics(bool x_tics) { x_tics_ = x_tics; }
 bool Params::y_tics() const { return y_tics_; }
 void Params::set_y_tics(bool y_tics) { y_tics_ = y_tics; }
 
-int Params::linestyle() const { return linestyle_; }
-void Params::set_linestyle(int linestyle) { linestyle_ = linestyle; }
+int Params::linestyle() const { return linestyle_[0]; }
+int Params::linestyle(size_t series_idx) const {
+  return linestyle_[series_idx % 6];
+}
+void Params::set_linestyle(int linestyle) { linestyle_[0] = linestyle; }
+void Params::set_linestyle(size_t series_idx, int linestyle) {
+  linestyle_[series_idx % 6] = linestyle;
+}
 
 double Params::xvline() const { return xvline_; }
 void Params::set_xvline(double xvline) { xvline_ = xvline; }
@@ -74,15 +80,6 @@ void Params::Print() const {
   }
   cout << "  x_tics: " << x_tics_ << endl;
   cout << "  y_tics: " << y_tics_ << endl;
-  if (linestyle_ == LINES) {
-    cout << "  linestyle: LINES" << endl;
-  } else if (linestyle_ == POINTS) {
-    cout << "  linestyle: POINTS" << endl;
-  } else if (linestyle_ == (LINES + POINTS)) {
-    cout << "  linestyle: LINES + POINTS" << endl;
-  } else {
-    cout << "  linestyle: LINES (default)" << endl;
-  }
   cout << "  xvline: " << xvline_ << endl;
   cout << "  dst_filename: " << dst_filename_ << endl;
 }

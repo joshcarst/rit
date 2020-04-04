@@ -2,7 +2,7 @@
  *
  *  \file plot/plot2d/Params.h
  *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 9 February 2020
+ *  \date 4 April 2020
  */
 
 #pragma once
@@ -65,7 +65,9 @@ class Params {
   /** Accessor and mutator for the linestyle member
    */
   int linestyle() const;
+  int linestyle(size_t series_idx) const;
   void set_linestyle(int linestyle);
+  void set_linestyle(size_t series_idx, int linestyle);
 
   /** Accessor and mutator for the xvline member
    */
@@ -101,7 +103,7 @@ class Params {
   double y_max_ = -1;
   bool x_tics_ = false;
   bool y_tics_ = false;
-  int linestyle_ = LINES;
+  int linestyle_[6] = {LINES, LINES, LINES, LINES, LINES, LINES};
   double xvline_ = 0;
   std::string dst_filename_ = "";
 };
