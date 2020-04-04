@@ -47,12 +47,19 @@ bool Params::y_tics() const { return y_tics_; }
 void Params::set_y_tics(bool y_tics) { y_tics_ = y_tics; }
 
 int Params::linestyle() const { return linestyle_[0]; }
-int Params::linestyle(size_t series_idx) const {
-  return linestyle_[series_idx % 6];
+void Params::set_linestyle(int linestyle) {
+  auto number_linestyles = sizeof(linestyle_) / sizeof(linestyle_[0]);
+  for (size_t idx = 0; idx < number_linestyles; idx++) {
+    linestyle_[idx] = linestyle;
+  }
 }
-void Params::set_linestyle(int linestyle) { linestyle_[0] = linestyle; }
+int Params::linestyle(size_t series_idx) const {
+  auto number_linestyles = sizeof(linestyle_) / sizeof(linestyle_[0]);
+  return linestyle_[series_idx % number_linestyles];
+}
 void Params::set_linestyle(size_t series_idx, int linestyle) {
-  linestyle_[series_idx % 6] = linestyle;
+  auto number_linestyles = sizeof(linestyle_) / sizeof(linestyle_[0]);
+  linestyle_[series_idx % number_linestyles] = linestyle;
 }
 
 double Params::xvline() const { return xvline_; }

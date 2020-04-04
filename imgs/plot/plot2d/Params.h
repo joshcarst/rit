@@ -65,8 +65,8 @@ class Params {
   /** Accessor and mutator for the linestyle member
    */
   int linestyle() const;
-  int linestyle(size_t series_idx) const;
   void set_linestyle(int linestyle);
+  int linestyle(size_t series_idx) const;
   void set_linestyle(size_t series_idx, int linestyle);
 
   /** Accessor and mutator for the xvline member
