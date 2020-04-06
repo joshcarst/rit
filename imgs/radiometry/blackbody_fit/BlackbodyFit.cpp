@@ -17,10 +17,10 @@ using namespace std;
 
 namespace radiometry {
 
-double BlackbodyFit(std::vector<double>& wavelength,
-                    std::vector<double>& radiance, const double tolerance,
+double BlackbodyFit(vector<double>& wavelength,
+                    vector<double>& radiance, const double tolerance,
                     const double lower_limit, const double upper_limit,
-                    std::vector<double>& em_spec) {
+                    vector<double>& em_spec) {
   // checking if wavelength is in ascending order and reversing the vectors if
   // it isn't
   bool reversed = false;
