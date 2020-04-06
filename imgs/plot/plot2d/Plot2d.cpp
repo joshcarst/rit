@@ -2,7 +2,7 @@
  *
  *  \file imgs/plot/plot2d/Plot2d.cpp
  *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 9 February 2020
+ *  \date 4 April 2020
  */
 
 #include <iostream>
