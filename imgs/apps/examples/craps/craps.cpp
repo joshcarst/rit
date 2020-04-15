@@ -3,15 +3,15 @@
  * \file imgs/apps/examples/craps/craps.cpp
  * \author Josh Carstens, proponent of cran-grape juice (jdc3498@rit.edu)
  * \date 10 April 2020
- * \note Name me a better juice than cran-grape juice
+ * \note MAN the odds bet part took me so dang long I could have been doing
+ * other things what the heck man
  */
 
-#include <algorithm>
-#include <chrono>
-#include <random>
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #include <boost/program_options.hpp>
 
@@ -19,11 +19,8 @@ using namespace std;
 namespace po = boost::program_options;
 
 void roll_dice(std::vector<int>& dice, int& roll) {
-  // using the ol Mersenne Twister for extra entropy
-  mt19937 rand(chrono::steady_clock::now().time_since_epoch().count());
-  uniform_int_distribution<int> distribution(1, 6);
-  dice[0] = distribution(rand);
-  dice[1] = distribution(rand);
+  dice[0] = rand() % 6 + 1;
+  dice[1] = rand() % 6 + 1;
   roll = dice[0] + dice[1];
 }
 
@@ -52,14 +49,14 @@ int main(int argc, char* argv[]) {
   // The minimum bet to be placed (i.e. the initial "line" bet as well as
   // the bet to be placd after any winning game -or- as a stand-alone "odds"
   // bet)
-  int minimum_bet_amount;
+  double line_desired;
 
   // The bankroll that play is started with
-  int initial_bankroll;
+  double initial_bankroll;
 
   // Desired winnings, which if achieved, would indicate that session play
   // should be terminated
-  int walk_away_winnings;
+  double walk_away_winnings;
 
   // **************************************************************************
   // Implement command-line interface utilizing Boost program options library
@@ -87,10 +84,10 @@ int main(int argc, char* argv[]) {
   // that are to be hidden from the user -or- that are to be used as
   // positional arguments
   po::options_description hidden_options("Hidden Options");
-  hidden_options.add_options()("bet,b", po::value<int>(&minimum_bet_amount),
+  hidden_options.add_options()("bet,b", po::value<double>(&line_desired),
                                "minimum bet amount")(
-      "bankroll,r", po::value<int>(&initial_bankroll), "initial bankroll")(
-      "walk-away-winnings,w", po::value<int>(&walk_away_winnings),
+      "bankroll,r", po::value<double>(&initial_bankroll), "initial bankroll")(
+      "walk-away-winnings,w", po::value<double>(&walk_away_winnings),
       "winnings after which you'll walk away from the table");
 
   // Instantiate the "all options" object (combining the "visible options"
@@ -148,7 +145,6 @@ int main(int argc, char* argv[]) {
   // If the number of simulations is greater than 1, silence the per
   // game/session reporting dialog (setting the verbose flag to false)
   bool verbose = (number_of_simulations == 1) ? true : false;
-  //bool verbose = true;
 
   // Display the run-time parameters for the simulation
   cout << "----------------------------------------"
@@ -161,7 +157,7 @@ int main(int argc, char* argv[]) {
   cout << "Verbosity: " << (verbose ? "On" : "Off") << endl;
   cout << "Number of simulated sessions to perform: " << number_of_simulations
        << endl;
-  cout << "Minimum bet: $" << minimum_bet_amount << endl;
+  cout << "Minimum bet: $" << line_desired << endl;
   cout << "Initial bankroll: $" << initial_bankroll << endl;
   cout << "Winnings after which you will walk away: $" << walk_away_winnings
        << endl;
@@ -172,27 +168,46 @@ int main(int argc, char* argv[]) {
   // Set initial dice elements
   vector<int> dice(2);
   int roll = 0;
+  srand(time(NULL));
+
+  // Setting two decimal places for cout along with setprecision(2)
+  cout << fixed;
 
   // Some values to store statistical information
   double num_games = 0;
   double num_games_won = 0;
   double num_walks = 0;
+  double total_winnings = 0;
 
   // Permanent store of our bet amount
-  auto init_bet_amount = minimum_bet_amount;
+  double init_line = line_desired;
 
   // "Actual" bet amount
-  auto bet_amount = init_bet_amount;
+  double line_actual = init_line;
+
+  // Values for odds bet
+  double odds_desired = 0;
+  double odds_actual = 0;
+
+  // Making the odds bets constant and equal to the line bet if Martingale is
+  // disabled
+  if (use_martingale_system == false) {
+    odds_desired = init_line;
+    odds_actual = init_line;
+  }
 
   // Value that tracks bankroll over multiple games
-  auto bankroll = initial_bankroll;
+  double bankroll = initial_bankroll;
+
+  // Martingale multiplier
+  int multiplier = 1;
 
   // Repeats the simulation if number_of_simulations > 1
   for (int idx = 0; idx < number_of_simulations; idx++) {
     // Session loop, ends if the desired earnings are met or money is depleted
     while (bankroll < (initial_bankroll + walk_away_winnings) && bankroll > 0) {
       // Used to compare the previous and current bankroll value to detect loss
-      auto prev_bankroll = bankroll;
+      double prev_bankroll = bankroll;
 
       // The come-out roll
       roll_dice(dice, roll);
@@ -201,8 +216,9 @@ int main(int argc, char* argv[]) {
       // for the verbose flag (which was a pain), let me know if there's a more
       // efficient way to do this
       if (verbose == true) {
-        cout << "Desired line bet: $" << minimum_bet_amount << endl;
-        cout << "Line bet: $" << bet_amount << endl;
+        cout << "Desired line bet: $" << setprecision(2) << line_desired
+             << endl;
+        cout << "Line bet: $" << setprecision(2) << line_actual << endl;
         cout << "Come out roll: " << dice[0] << " + " << dice[1] << " = "
              << roll << endl;
       }
@@ -210,13 +226,13 @@ int main(int argc, char* argv[]) {
       // Come-out roll conditions
       if (roll == 7 || roll == 11) {
         if (pass == false) {
-          bankroll -= bet_amount;
+          bankroll -= line_actual;
           if (verbose == true) {
             cout << "RESULT: You rolled a " << roll
                  << " on the come-out roll, you lose :(" << endl;
           }
         } else {
-          bankroll += bet_amount;
+          bankroll += line_actual;
           num_games_won++;  // We count every time a game is won for statistics
           if (verbose == true) {
             cout << "RESULT: You rolled a " << roll
@@ -226,7 +242,7 @@ int main(int argc, char* argv[]) {
       } else if (roll == 2 || roll == 3 || roll == 12) {
         if (pass == false) {
           if (roll != 12) {
-            bankroll += bet_amount;
+            bankroll += line_actual;
             num_games_won++;
             if (verbose == true) {
               cout << "RESULT: You rolled a " << roll
@@ -239,7 +255,7 @@ int main(int argc, char* argv[]) {
             }
           }
         } else {
-          bankroll -= bet_amount;
+          bankroll -= line_actual;
           if (verbose == true) {
             cout << "RESULT: You rolled a " << roll
                  << " on the come-out roll, you lose :(" << endl;
@@ -252,6 +268,18 @@ int main(int argc, char* argv[]) {
           cout << "Point: " << point << endl;
         }
 
+        // Keeps the odds bet from putting the bankroll into the negatives
+        if (odds == true) {
+          if (bankroll - (odds_actual + line_actual) <= 0) {
+            odds_actual = bankroll - line_actual;
+          }
+          if (verbose == true && odds_actual != 0) {
+            cout << "Desired odds bet: $" << setprecision(2) << odds_desired
+                 << endl;
+            cout << "Odds bet: $" << setprecision(2) << odds_actual << endl;
+          }
+        }
+
         // Keep rolling until a 7 or the point rolled
         // At first I had "roll != 7 && roll != point" as the condition for this
         // loop and then I rolled the dice once before entering it, but then I
@@ -262,24 +290,61 @@ int main(int argc, char* argv[]) {
           if (verbose == true) {  // Then we print it
             cout << "Roll: " << dice[0] << " + " << dice[1] << " = " << roll
                  << endl;
-            if (roll == 7 || roll == point) {  // Then we check if it's a 7 or
-                                               // the point and break if it is
-              break;
-            }
+          }
+          if (roll == 7 || roll == point) {  // Then we check if it's a 7 or
+                                             // the point and break if it is
+            break;
           }
         }
 
         // Conditions when a 7 is rolled
         if (roll == 7) {
           if (pass == false) {
-            bankroll += bet_amount;
-            num_games_won++;
+            if (odds == true && odds_actual != 0) {
+              if (point == 4 || point == 10) {
+                bankroll += 0.5 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 0.5 [odds multiplier from point "
+                       << point << "]) = $" << line_actual + (odds_actual * 0.5)
+                       << " total winnings" << endl;
+                }
+              }
+              if (point == 5 || point == 9) {
+                bankroll += 0.6667 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 0.6667 [odds multiplier from point "
+                       << point << "]) = $"
+                       << line_actual + (odds_actual * 0.6667)
+                       << " total winnings" << endl;
+                }
+              }
+              if (point == 6 || point == 8) {
+                bankroll += 0.8333 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 0.8333 [odds multiplier from point "
+                       << point << "]) = $"
+                       << line_actual + (odds_actual * 0.8333)
+                       << " total winnings" << endl;
+                }
+              }
+            }
+            bankroll += line_actual;
             if (verbose == true) {
               cout << "RESULT: You rolled a " << roll
                    << " before the point, you win :)" << endl;
             }
+            num_games_won++;
           } else {
-            bankroll -= bet_amount;
+            if (odds == true && odds_actual != 0) {
+              bankroll -= odds_actual;
+            }
+            bankroll -= line_actual;
             if (verbose == true) {
               cout << "RESULT: You rolled a " << roll
                    << " before the point, you lose :(" << endl;
@@ -289,12 +354,47 @@ int main(int argc, char* argv[]) {
           // Conditions if the point is rolled
         } else {
           if (pass == false) {
-            bankroll -= bet_amount;
+            if (odds == true && odds_actual != 0) {
+              bankroll -= odds_actual;
+            }
+            bankroll -= line_actual;
             if (verbose == true) {
               cout << "RESULT: You rolled the point, you lose :(" << endl;
             }
           } else {
-            bankroll += bet_amount;
+            if (odds == true && odds_actual != 0) {
+              if (point == 4 || point == 10) {
+                bankroll += 2 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 2 [odds multiplier from point "
+                       << point << "]) = $" << line_actual + (odds_actual * 2)
+                       << " total winnings" << endl;
+                }
+              }
+              if (point == 5 || point == 9) {
+                bankroll += 1.5 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 1.5 [odds multiplier from point "
+                       << point << "]) = $" << line_actual + (odds_actual * 1.5)
+                       << " total winnings" << endl;
+                }
+              }
+              if (point == 6 || point == 8) {
+                bankroll += 1.2 * odds_actual;
+                if (verbose == true) {
+                  cout << "Math: $" << line_actual << " [line bet] + ($"
+                       << odds_actual
+                       << " [odds bet] * 1.2 [odds multiplier from point "
+                       << point << "]) = $" << line_actual + (odds_actual * 1.2)
+                       << " total winnings" << endl;
+                }
+              }
+            }
+            bankroll += line_actual;
             num_games_won++;
             if (verbose == true) {
               cout << "RESULT: You rolled the point, you win :)" << endl;
@@ -305,31 +405,57 @@ int main(int argc, char* argv[]) {
 
       // Printing the current bankroll
       if (verbose == true) {
-        cout << "Bankroll: $" << bankroll << endl;
+        cout << "Bankroll: $" << setprecision(2) << bankroll << endl;
       }
 
       // Misc. post-game accounting and implementation
 
       num_games++;  // Tracking the total number of games
+      total_winnings += (bankroll - initial_bankroll);
 
       // Martingale System implementation
       if (use_martingale_system == true) {
         if (bankroll < prev_bankroll) {  // If we lost money
-          minimum_bet_amount *= 2;       // Double our next bet
+          multiplier *= 2;               // Double our next bet
         } else {                         // If we haven't lost money
-          minimum_bet_amount =
-              init_bet_amount;  // Reset our next bet to our specified value
+          multiplier = 1;  // Reset our next bet to our specified value
         }
-        bet_amount = minimum_bet_amount;  // Update the actual bet amount
       }
 
-      // Handles when there isn't enough money remaining to meet the desired
-      // line bet
-      if (bankroll < bet_amount) {
-        bet_amount = bankroll;  // If there isn't enough to meet the minimum
-                                // bet, go all-in
+      // Main odds bet implementation
+      if (odds == true) {
+        double total_bet =
+            line_actual;  // Redefining the whole value being played
+        if (use_martingale_system == true) {
+          // Kinda forgot what the rest of this does tbh
+          odds_desired = (line_desired * multiplier - init_line);
+          line_desired = init_line;
+          line_actual = line_desired;
+          odds_actual = odds_desired;
+        } else {
+          odds_desired = init_line;
+          if (bankroll < total_bet) {
+            if (bankroll < line_actual) {
+              line_actual = bankroll;
+              odds_actual = 0;
+            } else {
+              odds_actual = (bankroll - line_actual);
+            }
+          } else {
+            odds_actual = odds_desired;
+            line_actual = line_desired;
+          }
+        }
       } else {
-        bet_amount = init_bet_amount;  // Reset to the specified amount
+        // Handles when there isn't enough money remaining to meet the desired
+        // line bet
+        if (bankroll < line_actual) {
+          line_actual = bankroll;  // If there isn't enough to meet the minimum
+                                   // bet, go all-in
+        } else {
+          line_desired = init_line * multiplier;
+          line_actual = line_desired;  // Reset to the specified amount
+        }
       }
 
       // Interactive mode implementation
@@ -351,18 +477,21 @@ int main(int argc, char* argv[]) {
 
     // Resetting our bankroll and bet amounts going into the next simulation
     bankroll = initial_bankroll;
-    bet_amount = init_bet_amount;
-    minimum_bet_amount = init_bet_amount;
+    line_actual = init_line;
+    line_desired = init_line;
   }
   // Statistics outputs
   if (number_of_simulations > 1) {
     cout << "The overall probability of winning (percentage of 'games' won): "
-         << (num_games_won / num_games) << "%" << endl;
+         << (num_games_won / num_games) * 100 << "%" << endl;
     cout << "Average number of 'games' played per simulation: "
          << (num_games / number_of_simulations) << endl;
     cout << "Simulations you successfully walked away from: " << num_walks
          << " out of " << number_of_simulations << " ("
-         << (num_walks / number_of_simulations) << "%)" << endl;
+         << (num_walks / number_of_simulations) * 100 << "%)" << endl;
+    cout << "Net winnings (losses) after all simulations: $(" << setprecision(2)
+         << abs(total_winnings) << ")" << endl;
+    cout << endl;
   }
   return EXIT_SUCCESS;
 }
