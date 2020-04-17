@@ -2,7 +2,7 @@
  *
  * \file Blackbody_Fit/BlackbodyFit.cpp
  * \author Josh Carstens, creator of ants (jdc3498@rit.edu)
- * \date 1 April 2020
+ * \date 15 April 2020
  * \note I'm also the destroyer of ants
  */
 

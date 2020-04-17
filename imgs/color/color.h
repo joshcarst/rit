@@ -8,3 +8,4 @@
 #pragma once
 
 #include "imgs/color/cie/CIE.h"
+#include "imgs/color/spectrum/Spectrum.h"

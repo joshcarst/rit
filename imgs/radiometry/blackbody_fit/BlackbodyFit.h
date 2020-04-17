@@ -6,6 +6,8 @@
  * \note I watched the Big Short recently, good movie
  */
 
+#include <vector>
+
 namespace radiometry {
 double BlackbodyFit(std::vector<double>& wavelength,
                     std::vector<double>& radiance, const double tolerance,
