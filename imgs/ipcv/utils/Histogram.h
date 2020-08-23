@@ -1,8 +1,8 @@
 /** Interface file for computing an image histogram
  *
  *  \file ipcv/utils/Histogram.h
- *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 17 Mar 2018
+ *  \author Josh Carstens, Tommy Cash's biggest fan (jdc3498@rit.edu)
+ *  \date 26 Apr 2020
  */
 
 #pragma once

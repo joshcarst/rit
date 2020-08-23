@@ -1,8 +1,8 @@
 /** Interface file for computing a CDF from a histogram
  *
  *  \file ipcv/utils/HistogramToCdf.h
- *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 17 Mar 2018
+ *  \author Josh Carstens, man behind the mirror (jdc3498@rit.edu)
+ *  \date 26 Apr 2020
  */
 
 #pragma once

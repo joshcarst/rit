@@ -78,13 +78,15 @@ int main(int argc, char* argv[]) {
   cv::Mat_<double> cdf;
   ipcv::HistogramToCdf(h, cdf);
 
-  for (int i = 0; i < 256; i++) {
-    cout << dc(i) << " ";
-    cout << h(i) << " ";
-    cout << pdf(i) << " ";
-    cout << cdf(i) << " ";
-    cout << endl;
-  }
+  // for (int i = 0; i < 256; i++) {
+  //   cout << dc(i) << " ";
+  //   cout << h(i) << " ";
+  //   cout << pdf(i) << " ";
+  //   cout << cdf(i) << " ";
+  //   cout << endl;
+  // }
+
+  cout << "Plotting values..." << endl;
 
   plot::plot2d::Params params;
   params.set_x_label("Digital Count");
@@ -93,6 +95,20 @@ int main(int argc, char* argv[]) {
   params.set_x_max(255);
   params.set_destination_filename(dst_filename);
   plot::Plot2d(dc, h, params);
+
+  params.set_x_label("Digital Count");
+  params.set_y_label("Probability Density");
+  params.set_x_min(0);
+  params.set_x_max(255);
+  params.set_destination_filename(dst_filename);
+  plot::Plot2d(dc, pdf, params);
+
+  params.set_x_label("Digital Count");
+  params.set_y_label("Cumulative Density");
+  params.set_x_min(0);
+  params.set_x_max(255);
+  params.set_destination_filename(dst_filename);
+  plot::Plot2d(dc, cdf, params);
 
   return EXIT_SUCCESS;
 }
