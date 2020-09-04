@@ -6,6 +6,7 @@ set(HDRS
 )
 
 add_subdirectory(plot2d)
+add_subdirectory(plot3d)
 
 rit_add_library(plot SOURCES ${SRCS} HEADERS ${HDRS})
 

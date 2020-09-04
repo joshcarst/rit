@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace plot {
+namespace plot::plot2d {
 
 void set_common_parameters(string& gp_msg, const plot2d::Params& params) {
   if (params.destination_filename() == "") {

@@ -18,7 +18,7 @@
 
 #include "imgs/plot/plot2d/Params.h"
 
-namespace plot {
+namespace plot::plot2d {
 
 void set_common_parameters(std::string& gp_msg, const plot2d::Params& params);
 
