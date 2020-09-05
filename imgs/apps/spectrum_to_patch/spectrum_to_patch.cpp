@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(2.0);
-    plot::Plot2d(steve.wavelengths(), steve.reflectance(), params);
+    plot::plot2d::Plot2d(steve.wavelengths(), steve.reflectance(), params);
 
     // Getting vectors from the cie object to graph
     Eigen::VectorXd graph2_x = cie.wavelengths();
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(300.0);
-    plot::Plot2d(graph2_x, graph2_y, params);
+    plot::plot2d::Plot2d(graph2_x, graph2_y, params);
 
     // These mfing three lines of code are why I submitted files 7 minutes late
     // (besides the insane compile times of course)
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(2.05);
-    plot::Plot2d(graph3_x, graph3_y, params);
+    plot::plot2d::Plot2d(graph3_x, graph3_y, params);
 
     // Finally, scaling the srgb values by 255 and displaying in a window. This
     // seems to produce a slightly off-white square, not sure if that's intended
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(100.0);
-    plot::Plot2d(steve.wavelengths(), steve.reflectance(), params);
+    plot::plot2d::Plot2d(steve.wavelengths(), steve.reflectance(), params);
 
     Eigen::VectorXd graph2_x = cie.wavelengths();
     Eigen::VectorXd graph2_y = cie.reference_illuminant(RI);
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(300.0);
-    plot::Plot2d(graph2_x, graph2_y, params);
+    plot::plot2d::Plot2d(graph2_x, graph2_y, params);
 
     Eigen::MatrixXd graph3_y = cie.standard_observer(SO);
     Eigen::MatrixXd graph3_x(graph3_y.rows(), graph3_y.cols());
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
     params.set_linestyle(params.LINES);
     params.set_y_min(0.0);
     params.set_y_max(2.05);
-    plot::Plot2d(graph3_x, graph3_y, params);
+    plot::plot2d::Plot2d(graph3_x, graph3_y, params);
 
     steve.patch();
   }

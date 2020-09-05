@@ -94,21 +94,21 @@ int main(int argc, char* argv[]) {
   params.set_x_min(0);
   params.set_x_max(255);
   params.set_destination_filename(dst_filename);
-  plot::Plot2d(dc, h, params);
+  plot::plot2d::Plot2d(dc, h, params);
 
   params.set_x_label("Digital Count");
   params.set_y_label("Probability Density");
   params.set_x_min(0);
   params.set_x_max(255);
   params.set_destination_filename(dst_filename);
-  plot::Plot2d(dc, pdf, params);
+  plot::plot2d::Plot2d(dc, pdf, params);
 
   params.set_x_label("Digital Count");
   params.set_y_label("Cumulative Density");
   params.set_x_min(0);
   params.set_x_max(255);
   params.set_destination_filename(dst_filename);
-  plot::Plot2d(dc, cdf, params);
+  plot::plot2d::Plot2d(dc, cdf, params);
 
   return EXIT_SUCCESS;
 }

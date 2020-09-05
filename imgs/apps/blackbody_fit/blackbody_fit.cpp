@@ -68,5 +68,5 @@ int main(int argc, char* argv[]) {
   params.set_x_max(upper_limit);
   params.set_y_min(0.0);
   params.set_y_max(1.05);
-  plot::Plot2d(wavelength, em_spec, params);
+  plot::plot2d::Plot2d(wavelength, em_spec, params);
 }

@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     y.push_back((double)i * 50);
   }
 
-  plot::Plot2d(x, y, params);
+  plot::plot2d::Plot2d(x, y, params);
 
   // Vector of Vectors
   std::vector<double> x1;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   ys.push_back(y1);
   ys.push_back(y2);
 
-  plot::Plot2d(xs, ys, params);
+  plot::plot2d::Plot2d(xs, ys, params);
 
   // Single vector in a cv::Mat_<double>
   cv::Mat_<double> xm = cv::Mat_<double>::zeros(1, 51);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     ym(0, i) = i * 50;
   }
 
-  plot::Plot2d(xm, ym, params);
+  plot::plot2d::Plot2d(xm, ym, params);
 
   // Multiple vectors in a cv::Mat_<double>
   cv::Mat_<double> xms;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     yms(1, i) = i * i;
   }
 
-  plot::Plot2d(xms, yms, params);
+  plot::plot2d::Plot2d(xms, yms, params);
 
   // Single vector in a cv::Mat_<int>
   cv::Mat_<int> xmi = cv::Mat_<int>::zeros(1, 51);
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     ymi(0, i) = i * 50;
   }
 
-  plot::Plot2d(xmi, ymi, params);
+  plot::plot2d::Plot2d(xmi, ymi, params);
 
   params.Print();
 
