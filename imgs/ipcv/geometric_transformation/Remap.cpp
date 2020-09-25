@@ -33,7 +33,7 @@ bool Remap(const cv::Mat& src, cv::Mat& dst, const cv::Mat& map1,
            const BorderMode border_mode, const uint8_t border_value) {
   dst.create(map1.size(), src.type());
 
-  // Insert your code here
+  
 
   return true;
 }
