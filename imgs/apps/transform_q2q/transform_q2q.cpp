@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
-//#include <opencv2/imgproc.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "imgs/ipcv/geometric_transformation/GeometricTransformation.h"
 
@@ -150,10 +150,10 @@ int main(int argc, char* argv[]) {
   status = ipcv::MapQ2Q(src, tgt, src_vertices, tgt_vertices, map1, map2);
 
   cv::Mat dst;
-//  cv::remap(src, dst, map1, map2, cv::INTER_NEAREST, cv::BORDER_CONSTANT,
-//            cv::Scalar(0, 0, 0) );
-  status = ipcv::Remap(src, dst, map1, map2, interpolation, border_mode,
-                       border_value);
+  cv::remap(src, dst, map1, map2, cv::INTER_NEAREST, cv::BORDER_CONSTANT,
+            cv::Scalar(0, 0, 0) );
+  //status = ipcv::Remap(src, dst, map1, map2, interpolation, border_mode,
+  //                     border_value);
 
   clock_t endTime = clock();
 
