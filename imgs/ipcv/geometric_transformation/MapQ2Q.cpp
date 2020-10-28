@@ -96,8 +96,8 @@ bool MapQ2Q(const cv::Mat src, const cv::Mat tgt,
       // Calculating output map positions
       output = p_ms * input;
       // Assigning to map matrices
-      map1.at<float>(row, col) = output(1);
-      map2.at<float>(row, col) = output(0);
+      map1.at<float>(row, col) = output(1) / output(2);
+      map2.at<float>(row, col) = output(0) / output(2);
     }
   }
 

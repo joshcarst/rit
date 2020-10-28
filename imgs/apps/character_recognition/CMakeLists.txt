@@ -9,4 +9,5 @@ target_link_libraries(character_recognition
   opencv_core
   opencv_highgui
   opencv_imgcodecs
+  rit::plot
 )

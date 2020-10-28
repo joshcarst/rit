@@ -1,51 +1,56 @@
+/** Application/implementation file for character recognition
+ *
+ *  \file ipcv/spatial_filtering/Filter2D.cpp
+ *  \author Josh Carstens, Spooked Out (jc@mail.rit.edu)
+ *  \date 21 Oct 2020
+ *  \note I may have used a late credit for this one but
+ * Oneohtrix Point Never has a new album coming out so I'm okay
+ */
+
+// Not even sure how many of these I need at this point
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+#include <filesystem>
+#include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
+#include "imgs/ipcv/utils/Utils.h"
+#include "imgs/plot/plot.h"
+
 using namespace std;
 
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
+  // Default variables
   bool verbose = false;
   string src_filename = "";
-  string map_filename = "";
-  string gcp_filename = "";
-  string dst_filename = "";
-  int order = 1;
-  int value = 0;
+  double threshold = 0.97;
+  string filter_type = "matching";
+  string character_path = "";
+  string extension = ".tif";
 
-  string interpolation_string = "nearest";
-  ipcv::Interpolation interpolation;
-
-  string border_mode_string = "constant";
-  ipcv::BorderMode border_mode;
-
+  // Pretty sure all this Boost stuff doesn't need comments
   po::options_description options("Options");
   options.add_options()("help,h", "display this message")(
       "verbose,v", po::bool_switch(&verbose), "verbose [default is silent]")(
       "source-filename,i", po::value<string>(&src_filename), "source filename")(
-      "map-filename,p", po::value<string>(&map_filename), "map filename")(
-      "gcp-filename,g", po::value<string>(&gcp_filename), "gcp filename")(
-      "destination-filename,o", po::value<string>(&dst_filename),
-      "destination filename [default is empty]")(
-      "polynomial-order,n", po::value<int>(&order),
-      "order of mapping polynomial [default is 1]")(
-      "interpolation,t", po::value<string>(&interpolation_string),
-      "interpolation (nearest|bilinear) [default is nearest]")(
-      "border-mode,m", po::value<string>(&border_mode_string),
-      "border mode (constant|replicate) [default is constant]")(
-      "border-value,b", po::value<int>(&value), "border value [default is 0]");
+      "filter-type,f", po::value<string>(&filter_type),
+      "filter type (matching|vector) [default is matching]")(
+      "threshold,t", po::value<double>(&threshold),
+      "threshold [default is 0.97]")("character-path,c",
+                                     po::value<string>(&character_path),
+                                     "character set path");
 
   po::positional_options_description positional_options;
   positional_options.add("source-filename", 1);
-  positional_options.add("map-filename", 1);
-  positional_options.add("gcp-filename", 1);
+  positional_options.add("character-path", 1);
 
   po::variables_map vm;
   po::store(po::command_line_parser(argc, argv)
@@ -58,125 +63,158 @@ int main(int argc, char* argv[]) {
   if (vm.count("help")) {
     cout << "Usage: " << argv[0] << " [options] ";
     cout << "source-filename ";
-    cout << "map-filename ";
-    cout << "gcp-filename ";
+    cout << "character-path ";
     cout << endl;
     cout << options << endl;
     return EXIT_SUCCESS;
   }
 
-  if (interpolation_string == "nearest") {
-    interpolation = ipcv::Interpolation::NEAREST;
-  } else if (interpolation_string == "bilinear") {
-    interpolation = ipcv::Interpolation::LINEAR;
-  } else {
+  if (filter_type != "matching" && filter_type != "vector") {
     cerr << "*** ERROR *** ";
-    cerr << "Provided interpolation is not supported" << endl;
+    cerr << "Provided filter type is not supported" << endl;
     return EXIT_FAILURE;
   }
 
-  if (border_mode_string == "constant") {
-    border_mode = ipcv::BorderMode::CONSTANT;
-  } else if (border_mode_string == "replicate") {
-    border_mode = ipcv::BorderMode::REPLICATE;
-  } else {
-    cerr << "*** ERROR *** ";
-    cerr << "Provided border mode is not supported" << endl;
-    return EXIT_FAILURE;
-  }
-
+  // Reading in the source image
+  // Like you tend to do in IPCV class
+  cv::Mat src = cv::imread(src_filename, cv::IMREAD_GRAYSCALE);
   if (!boost::filesystem::exists(src_filename)) {
     cerr << "*** ERROR *** ";
     cerr << "Provided source file does not exists" << endl;
     return EXIT_FAILURE;
   }
 
-  if (!boost::filesystem::exists(map_filename)) {
+  if (!boost::filesystem::exists(character_path)) {
     cerr << "*** ERROR *** ";
-    cerr << "Provided map file does not exists" << endl;
+    cerr << "Provided character path does not exists" << endl;
     return EXIT_FAILURE;
   }
 
-  if (!boost::filesystem::exists(gcp_filename)) {
-    cerr << "*** ERROR *** ";
-    cerr << "Provided GCP file does not exists" << endl;
-    return EXIT_FAILURE;
-  }
+  // Making a list of all of the character files like in Carl's list_files
+  const auto& directory_entries =
+      filesystem::directory_iterator(character_path);
 
-  cv::Mat src = cv::imread(src_filename, cv::IMREAD_COLOR);
-  cv::Mat map = cv::imread(map_filename, cv::IMREAD_COLOR);
+  vector<string> character_paths;
+  for (const auto& directory_entry : directory_entries) {
+    if (directory_entry.path().extension() == extension) {
+      character_paths.push_back(directory_entry.path());
+    }
+  }
+  sort(character_paths.begin(), character_paths.end());
 
   if (verbose) {
     cout << "Source filename: " << src_filename << endl;
     cout << "Size: " << src.size() << endl;
     cout << "Channels: " << src.channels() << endl;
-    cout << "Map filename: " << map_filename << endl;
-    cout << "Size: " << map.size() << endl;
-    cout << "Channels: " << map.channels() << endl;
-    cout << "GCP filename: " << gcp_filename << endl;
-    cout << "Order: " << order << endl;
-    cout << "Interpolation: " << interpolation_string << endl;
-    cout << "Border mode: " << border_mode_string << endl;
-    cout << "Border value: " << value << endl;
-    cout << "Destination filename: " << dst_filename << endl;
-  }
-
-  uint8_t border_value = value;
-
-  vector<float> sc;
-  vector<float> sr;
-  vector<float> mc;
-  vector<float> mr;
-
-  ifstream f;
-  f.open(gcp_filename);
-  if (f.is_open()) {
-    string buffer;
-    getline(f, buffer);
-    getline(f, buffer);
-    while (!f.eof()) {
-      getline(f, buffer);
-      if (buffer == "") {
-        break;
-      }
-      size_t size;
-      sc.push_back(stof(buffer, &size));
-      buffer = buffer.substr(size);
-      sr.push_back(stof(buffer, &size));
-      buffer = buffer.substr(size);
-      mc.push_back(stof(buffer, &size));
-      buffer = buffer.substr(size);
-      mr.push_back(stof(buffer, &size));
-      buffer = buffer.substr(size);
-    }
-    f.close();
-  } else {
-    cout << "*** ERROR *** ";
-    cerr << "GCP file could not be opened properly" << endl;
-    return EXIT_FAILURE;
-  }
-
-  vector<cv::Point> src_points(sc.size());
-  vector<cv::Point> map_points(mc.size());
-  for (size_t point = 0; point < sc.size(); point++) {
-    src_points[point].x = sc[point];
-    src_points[point].y = sr[point];
-    map_points[point].x = mc[point];
-    map_points[point].y = mr[point];
+    cout << "Filter type: " << filter_type << endl;
+    cout << "Threshold: " << threshold << endl;
+    cout << "Character set path: " << character_path << endl;
   }
 
   clock_t startTime = clock();
 
-  bool status = false;
-  cv::Mat map1;
-  cv::Mat map2;
-  status = ipcv::MapGCP(src, map, src_points, map_points, order, map1, map2);
+  // This is pretty much the implementation part
 
-  cv::Mat dst;
-//  cv::remap(src, dst, map1, map2, cv::INTER_NEAREST, cv::BORDER_CONSTANT,
-//            cv::Scalar(0, 0, 0) );
-  status = ipcv::Remap(src, dst, map1, map2, interpolation, border_mode,
-                       border_value);
+  // Two-row matrix: First row is what letter it be, second row is how many
+  // of that letter we sniped
+  cv::Mat match(2, character_paths.size(), CV_32FC1, cv::Scalar(0));
+  // What we're gonna be storing the scanned letters in eventually
+  vector<char> text_output(src.total());
+  // Set to keep track of spaces
+  bool char_exists = false;
+
+  // Doing a ~ inverts the image, pretty cool n concise
+  src = ~src;
+  // Converting to float so we can have normalized decimal values
+  src.convertTo(src, CV_32F);
+  src /= 255;
+  // Looping through every character in the specified path
+  for (size_t idx = 0; idx < character_paths.size(); idx++) {
+    // Reading in that character
+    cv::Mat current_char =
+        cv::imread(character_paths[idx], cv::IMREAD_GRAYSCALE);
+    // Saving the filename of that character to the corresponding table position
+    match.at<float>(0, idx) =
+        stoi(character_paths[idx].substr(character_paths[idx].length() - 6, 2),
+             nullptr);
+    // Doing the same float prep operations as we did to the src
+    current_char = ~current_char;
+    current_char.convertTo(current_char, CV_32F);
+    current_char /= 255;
+    // Normalizing according to the histogram sum of each character
+    if (filter_type == "matching") {
+      current_char /= cv::sum(current_char)[0];
+    }
+    // Looping through the src to scan for letters
+    for (int row = 0; row < src.rows; row++) {
+      for (int col = 0; col < src.cols; col++) {
+        // Making sure we don't go over the edge of the frame
+        if (row + current_char.rows < src.rows &&
+            col + current_char.cols < src.cols) {
+          // Cropping the src into kernel-sized boxes
+          cv::Rect cropped_char_area(col, row, current_char.cols,
+                                     current_char.rows);
+          cv::Mat cropped_char = src(cropped_char_area);
+          // Summing the cropped boxes to see if they're blank
+          double cropped_char_sum = cv::sum(cropped_char)[0];
+          // Designating a space if it's blank and updating the bool to reflect
+          if (char_exists == true && cropped_char_sum == 0) {
+            text_output[row * src.cols + col] = ' ';
+            char_exists = false;
+          }
+          // The cosine angle vector something or other method
+          if (filter_type == "vector") {
+            // Taking the dot products to find the magnitude of each character
+            double char_dot = sqrt(current_char.dot(current_char));
+            double cropped_char_dot = sqrt(cropped_char.dot(cropped_char));
+            // idk math
+            double vector_angle =
+                cropped_char.dot(current_char) / (char_dot * cropped_char_dot);
+            // Assigning corresponding characters from matching table to the
+            // text output and adding a count to the table if it's within threshold
+            if (vector_angle > threshold) {
+              text_output[row * src.cols + col] =
+                  match.at<float>(0, idx);
+              match.at<float>(1, idx) += 1;
+              char_exists = true;
+            }
+          // The real scary histogram matching method
+          // In the Halloween spirit
+          } else {
+            double sum = 0;
+            // Normalizing each character box but making sure to not div by 0
+            if (cropped_char_sum != 0) {
+              cropped_char /= cropped_char_sum;
+            }
+            // Looping through every pixel in each kernel
+            for (int row_2 = 0; row_2 < current_char.rows; row_2++) {
+              for (int col_2 = 0; col_2 < current_char.cols; col_2++) {
+                // Looking for filled in pixels
+                if (current_char.at<float>(row_2, col_2) > 0 &&
+                    cropped_char.at<float>(row_2, col_2) > 0) {
+                  // Adding to the counter if they exist
+                  sum += current_char.at<float>(row_2, col_2);
+                  sum += cropped_char.at<float>(row_2, col_2);
+                }
+              }
+            }
+            // Once again assigning text outputs and counting occurrences
+            if (sum - 1 >= threshold) {
+              text_output[row * src.cols + col] =
+                  match.at<float>(0, idx);
+              match.at<float>(1, idx) += 1;
+              char_exists = true;
+            }
+          }
+        }
+      }
+    }
+    // Printing occurrences as we go
+    if (verbose) {
+    char print_char = match.at<float>(0, idx);
+    cout << print_char << ": " << match.at<float>(1, idx) << endl;
+    }
+  }
 
   clock_t endTime = clock();
 
@@ -186,24 +224,21 @@ int main(int argc, char* argv[]) {
          << " [s]" << endl;
   }
 
-  cv::Mat overlay;
-  cv::addWeighted(map, 0.5, dst, 0.5, 0.0, overlay, map.depth());
+  // Idk I guess plot2d doesn't like to print rows of a cv::Mat
+  vector<float> match_x;
+  match.row(0).copyTo(match_x);
+  vector<float> match_y;
+  match.row(1).copyTo(match_y);
+  plot::plot2d::Params params;
+  params.set_x_label("Character");
+  params.set_y_label("Frequency");
+  params.set_x_min(39);
+  params.set_x_max(90);
+  plot::plot2d::Plot2d(match_x, match_y, params);
 
-  if (status) {
-    if (dst_filename.empty()) {
-      cv::imshow(src_filename, src);
-      cv::imshow(map_filename, map);
-      cv::imshow(src_filename + " [Remapped]", dst);
-      cv::imshow(src_filename + " [Overlay]", overlay);
-      cv::waitKey(0);
-    } else {
-      cv::imwrite(dst_filename, dst);
-    }
-  } else {
-    cerr << "*** ERROR *** ";
-    cerr << "An error occurred while remapping image" << endl;
-    return EXIT_FAILURE;
+  // Printing the final text output
+  for (size_t idx = 0; idx < text_output.size(); idx++) {
+    cout << text_output[idx];
   }
-
-  return EXIT_SUCCESS;
+  cout << endl;
 }
