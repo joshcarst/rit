@@ -11,6 +11,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include "opencv2/imgproc.hpp"
+#include "imgs/utils/utils.h"
+#include <eigen3/Eigen/Dense>
 
 using namespace std;
 

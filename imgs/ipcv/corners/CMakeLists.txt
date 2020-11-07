@@ -10,4 +10,6 @@ rit_add_library(ipcv_corners
 target_link_libraries(ipcv_corners 
   PUBLIC 
     opencv_core
+    rit::utils_shift_vector
+    Eigen3::Eigen
 )

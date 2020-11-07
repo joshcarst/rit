@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include "opencv2/imgproc.hpp"
 
 #include "imgs/ipcv/corners/Corners.h"
 
@@ -66,6 +67,27 @@ int main(int argc, char* argv[]) {
   cv::Mat dst;
   status = ipcv::Harris(src, dst, sigma, k);
 
+  // Not sure how much of this should be done in the app file vs the implementation but we doing it
+
+  // Making a copy of dst exactly as it comes from ipcv::Harris for outputting the coordinates later
+  cv::Mat dst_dupe;
+  dst.copyTo(dst_dupe);
+
+  // Setting dst to three-channel ints so we can put red dots on there
+  cv::cvtColor(dst, dst, cv::COLOR_GRAY2BGR);
+  dst.convertTo(dst, CV_8UC3);
+
+  // Dilating the individual white pixels to be slightly larger so they resemble dots
+  cv::dilate(dst, dst, cv::Mat(), cv::Point(-1,-1));
+
+  // Making a copy of src for us to modify and overlay dots on
+  cv::Mat src_dupe;
+  src.copyTo(src_dupe);
+
+  // Using the dilated dst matrix as a mask on our src matrix and putting red pixels wherever the mask lets them through
+  src_dupe.setTo(cv::Scalar(0,0,255), dst);
+  dst = src_dupe;
+
   clock_t endTime = clock();
 
   if (verbose) {
@@ -79,7 +101,15 @@ int main(int argc, char* argv[]) {
     cv::imshow(src_filename + " [Corners]", dst);
     cv::waitKey(0);
 
-    // Find the corner coordinates using the returned corner response image
+  // Quickly outputting pixel positions for all the white pixels from the original dst matrix
+  cout << endl;
+  for (int row = 0; row < dst_dupe.rows; row++) {
+    for (int col = 0; col < dst_dupe.cols; col++) {
+      if (dst_dupe.at<float>(row, col) == 255) {
+        cout << "Corner pixel at: (" << row << ", " << col << ")" << endl;
+      }
+    }
+  }
 
   } else {
     cerr << "*** ERROR *** ";
