@@ -7,13 +7,15 @@
 
 #include "Dft.h"
 
+using namespace std;
+
 namespace ipcv {
 
 cv::Mat Dft(cv::Mat f, const int flag) {
   const std::complex<double> i(0, 1);
 
   // Create the output cv::Mat (double-precision complex)
-  int N = f.rows;
+  double N = f.rows;
   cv::Mat F(N, 1, CV_64FC2);
 
   // Determine if the input cv::Mat is already complex (CV_64FC2).
@@ -45,11 +47,37 @@ cv::Mat Dft(cv::Mat f, const int flag) {
     cv::merge(channels, f_complex);
   }
 
-
-  // INSERT YOUR CODE HERE
-  // To compute the forward and inverse DFT on a cv::Mat of dimension Nx1
-
+  if (flag == 2) {
+    // Inverse case
+    // Loop through each value from the input vector
+    for (double u = 0; u < N; u++) {
+      // Target value to add to in the summation
+      complex<double> output_sum(0, 0);
+      // The summation
+      for (double x = 0; x < N; x++) {
+        // Pretty much the magic equation from the slides idk how math works
+        output_sum +=
+            f_complex.at<complex<double>>(x) *
+            (cos(2.0 * M_PI * u * x / N) - i * sin(2.0 * M_PI * u * x / N));
+      }
+      // Assigning the final sum to the output vector and scaling by N
+      F.at<complex<double>>(u) = output_sum / N;
+    }
+  } else {
+    // Scaling case
+    // Pretty much the same as above but adding the sin component and not
+    // scaling
+    for (double x = 0; x < N; x++) {
+      complex<double> output_sum(0, 0);
+      for (double u = 0; u < N; u++) {
+        output_sum +=
+            f_complex.at<complex<double>>(u) *
+            (cos(2.0 * M_PI * u * x / N) + i * sin(2.0 * M_PI * u * x / N));
+      }
+      F.at<complex<double>>(x) = output_sum;
+    }
+  }
 
   return F;
 }
-}
+}  // namespace ipcv

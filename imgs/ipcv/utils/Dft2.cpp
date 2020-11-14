@@ -5,6 +5,7 @@
  *  \date 05 November 2020
  */
 
+#include "Dft.h"
 #include "Dft2.h"
 
 namespace ipcv {
@@ -49,10 +50,28 @@ cv::Mat Dft2(cv::Mat f, const int flag) {
   // matrix, followed by the row transforms of the column transformed
   // coefficients
 
+  // First we transpose the original matrix and run Dft on the rows of that
+  // matrix, so essentially running Dft on the columns of the original matrix
+  cv::Mat f_transpose;
+  cv::transpose(f_complex, f_transpose);
+  for (int row = 0; row < f_complex.rows; row++) {
+    // We have to transpose again before sending it to Dft and then also
+    // transpose the result of that because computers
+    f_transpose.row(row) = ipcv::Dft(f_transpose.row(row).t(), flag).t();
+  }
+  // Then we take the transposed/Dft'd matrix and transpose it again before
+  // doing Dft on the rows again (so like actually the rows this time)
+  cv::Mat f_transpose_again;
+  cv::transpose(f_transpose, f_transpose_again);
+  for (int col = 0; col < f_complex.cols; col++) {
+    // Same deal here
+    f_transpose_again.row(col) =
+        ipcv::Dft(f_transpose_again.row(col).t(), flag).t();
+  }
 
-  // INSERT YOUR CODE HERE
-
+  // And then send it off cuz that's it
+  F = f_transpose_again;
 
   return F;
 }
-}
+}  // namespace ipcv
