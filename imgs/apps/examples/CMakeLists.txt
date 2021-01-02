@@ -1,6 +1,7 @@
 add_subdirectory(craps)
 add_subdirectory(diana)
 add_subdirectory(dist)
+add_subdirectory(fft_display)
 add_subdirectory(fourier)
 add_subdirectory(image_comparison)
 add_subdirectory(list_files)

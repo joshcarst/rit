@@ -1,8 +1,11 @@
 /** Implementation file for computing the 2D DFT of a matrix
  *
  *  \file ipcv/utils/Dft2.cpp
- *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 05 November 2020
+ *  \author Josh Carstens, Out of Goldfish Crackers (jc@mail.rit.edu)
+ *  \date 14 November 2020
+ *  \note I'm being very serious I have depleted my entire supply of Goldfish
+ * crackers in my house. I depend on them for energy. I eat them every day. They
+ * are a cornerstone of my diet. I'm starting to panic in their absence.
  */
 
 #include "Dft.h"

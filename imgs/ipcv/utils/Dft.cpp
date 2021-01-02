@@ -1,8 +1,10 @@
 /** Implementation file for computing the DFT of a vector
  *
  *  \file ipcv/utils/Dft.cpp
- *  \author Carl Salvaggio, Ph.D. (salvaggio@cis.rit.edu)
- *  \date 05 November 2020
+ *  \author Josh Carstens, Executive Producer of Shark Tale (jc@mail.rit.edu)
+ *  \date 14 November 2020
+ *  \note I'm thinking for Christmas ima ask for my car to by vinyl wrapped to
+ * look like a giant hunk of granite. What do you think
  */
 
 #include "Dft.h"
