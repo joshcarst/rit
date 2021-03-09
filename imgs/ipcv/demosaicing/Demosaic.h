@@ -8,4 +8,5 @@
 #pragma once
 
 #include "imgs/ipcv/demosaicing/Bilinear.h"
+#include "imgs/ipcv/demosaicing/GBTF.h"
 #include "imgs/ipcv/demosaicing/LarochePrescott.h"
