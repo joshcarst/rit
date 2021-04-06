@@ -9,7 +9,7 @@
 using namespace std;
 
 int main() {
-  string filename = "../data/images/misc/lenna_color.ppm";
+  string filename = "../data/images/misc/ww_B.jpg";
 
   cv::Mat src = cv::imread(filename, cv::IMREAD_UNCHANGED);
   cout << "Image ..." << endl;
@@ -18,8 +18,8 @@ int main() {
   cout << "Channels: " << src.channels() << endl;
   cout << endl;
 
-  cv::Mat blur;
-  cv::blur(src, blur, cv::Size(3, 3));
+  cv::Mat blur = cv::imread("../data/images/misc/ww_decode.jpg", cv::IMREAD_UNCHANGED);
+  //cv::blur(src, blur, cv::Size(3, 3));
   cout << "Blurred image ..." << endl;
   cout << "Dimensions: " << blur.rows << "x" << blur.cols << endl;
   cout << "Channels: " << blur.channels() << endl;
@@ -30,8 +30,8 @@ int main() {
   weights.setTo(cv::Scalar(1));
 
   std::vector<double> channel_psnr;
-  auto psnr = ipcv::Psnr(src, blur, 255, weights, channel_psnr);
-  // auto psnr = ipcv::Psnr(src, blur, 255, weights);
+  // auto psnr = ipcv::Psnr(src, blur, 255, weights, channel_psnr);
+   auto psnr = ipcv::Psnr(src, blur, 255, weights);
   // auto psnr = ipcv::Psnr(src, blur, 255, channel_psnr);
   // auto psnr = ipcv::Psnr(src, blur, 255);
   cout << "PSNR = " << psnr << endl;
@@ -43,8 +43,8 @@ int main() {
   cout << endl;
 
   std::vector<double> channel_rmse;
-  auto rmse = ipcv::Rmse(src, blur, weights, channel_rmse);
-  // auto rmse = ipcv::Rmse(src, blur, weights);
+  // auto rmse = ipcv::Rmse(src, blur, weights, channel_rmse);
+   auto rmse = ipcv::Rmse(src, blur, weights);
   // auto rmse = ipcv::Rmse(src, blur, channel_rmse);
   // auto rmse = ipcv::Rmse(src, blur);
   cout << "RMSE = " << rmse << endl;
